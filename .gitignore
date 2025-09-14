@@ -1,1 +1,26 @@
-/.DS_Store
+.DS_Store
+
+# 不要なpythonキャッシュ
+.pytest_cache/
+__pycache__/
+*.py[cod]
+
+# 仮想環境
+# venv/
+# .venv/
+
+# テスト・型チェックキャッシュ
+.pytest_cache/
+.mypy_cache/
+.coverage
+
+# ログ・DB
+# *.log
+# *.sqlite3
+
+# 環境変数ファイル（秘密情報）
+.env
+
+# IDE設定
+.vscode/
+# .idea/
