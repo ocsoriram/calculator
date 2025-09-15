@@ -2,6 +2,8 @@
 
 from fastapi.routing import APIRouter
 
+from backend.schemas.calc_formula_schema import CalcRequest
+
 
 router = APIRouter(prefix="/calc", tags=["calculator"])
 
@@ -11,7 +13,7 @@ def show_calculator():
 
 
 
-@router.post("/{calcFormula}")
-def show_calculator():
+@router.post("/")
+def show_calculator(request: CalcRequest):
 
-    return None
+    return {"received": request.formula}

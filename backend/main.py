@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from backend.router import calc_router
+from backend.routers import calc_router
 
 app = FastAPI()
 app.include_router(calc_router.router)
