@@ -1,6 +1,13 @@
+"""計算機能を提供するservice
+
+  * to_RPN(calc_formula: str): 中置記法の数式を受け取って、逆ポーランド記法のlistに変換
+  * calc_rpn(rpn: list[str]):逆ポーランド記法のlistの計算結果を返す
+"""
+
 import operator
 import re
 from attr import dataclass
+
 
 
 def to_RPN(calc_formula: str)->list[str]:
@@ -19,6 +26,12 @@ def to_RPN(calc_formula: str)->list[str]:
                       |\(|\) )"""          # ()
                       , re.VERBOSE)
   tokens = pattern.findall(calc_formula)
+
+  # トークンを結合し直して元の中置記法の式と一致するか確認することで、不適切な記号を弾く
+  parsed = "".join(tokens)
+  if parsed != calc_formula.replace(" ", ""):
+    raise ValueError("不適切な記号が含まれています。")
+
 
   # Shunting-yard algorithmの実装
   # tokensから値を一つずつ取り出す
