@@ -9,6 +9,9 @@ __pycache__/
 # venv/
 # .venv/
 
+# pythonの仮動作検証環境
+tmp
+
 # テスト・型チェックキャッシュ
 .pytest_cache/
 .mypy_cache/
