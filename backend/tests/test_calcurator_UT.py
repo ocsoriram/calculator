@@ -1,7 +1,7 @@
 """calc_serviceの単体テストを行うモジュール"""
 
 import pytest
-from backend.services.calc_service import calc_rpn, to_RPN
+from backend.services.calc_service import *
 
 
 def test_opening_parenthesis_missing_throws_ValueError():
@@ -13,6 +13,7 @@ def test_opening_parenthesis_missing_throws_ValueError():
 
 def test_closing_parenthesis_missing_throws_ValueError():
     """閉じ括弧が不足しているときにValueErrorを投げるか検証する"""
+
     invalid_formula = "(1+2"
     with pytest.raises(ValueError):
         to_RPN(invalid_formula)

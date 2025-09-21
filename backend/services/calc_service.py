@@ -8,6 +8,42 @@ import operator
 import re
 
 
+def _tokenize(calc_formula) -> list[str]:
+    """トークン化用の正規表現: 小数・整数・演算子・括弧を1トークンとして抽出"""
+    # 注意: キャプチャグループや ^/$ アンカーを入れると findall の結果やマッチ範囲が壊れるため使用しない
+    pattern = re.compile(
+        r"""
+        \d+\.\d+               # 小数
+        | \d+                  # 整数
+        | \+ | \- | \* | \/ | × | ÷  # 四則演算子
+        | \(|\)                # ()
+    """,
+        re.VERBOSE,
+    )
+    tokens = pattern.findall(calc_formula)
+
+    return tokens
+
+
+def _validate_tokens(tokens: list[str], original: str) -> None:
+    """calc_formulaのバリデーションを行う"""
+    _validate_formula_correct(tokens, original)
+    _validate_parentheses_correct(tokens)
+
+
+def _validate_formula_correct(tokens: list[str], original: str):
+    """トークンを結合し直して元の中置記法の式と一致するか確認することで、不適切な記号を弾く"""
+    parsed = "".join(tokens)
+    if parsed != original.replace(" ", ""):
+        raise ValueError("不適切な記号が含まれています。")
+
+
+def _validate_parentheses_correct(parsed):
+    """()のそれぞれの個数を比較して、()の書き忘れを検証する"""
+    if parsed.count("(") != parsed.count(")"):
+        raise ValueError("()の数が一致していません。")
+
+
 def to_RPN(calc_formula: str) -> list[str]:
     """Shunting-yard algorithm を使って、中置記法の計算式の文字列を逆ポーランド記法に変換する関数."""
 
@@ -17,27 +53,8 @@ def to_RPN(calc_formula: str) -> list[str]:
     # 演算子の優先順位を指定(数値が大きい方が優先度が高い)
     operators = {"+": 1, "-": 1, "*": 2, "×": 2, "/": 2, "÷": 2}
 
-    # トークン化用の正規表現: 小数・整数・演算子・括弧を1トークンとして抽出
-    # 注意: キャプチャグループや ^/$ アンカーを入れると findall の結果やマッチ範囲が壊れるため使用しない
-    pattern = re.compile(
-        r"""
-            \d+\.\d+             # 小数
-          | \d+                  # 整数
-          | \+ | \- | \* | \/ | × | ÷  # 四則演算子
-          | \(|\)                # ()
-        """,
-        re.VERBOSE,
-    )
-    tokens = pattern.findall(calc_formula)
-
-    # トークンを結合し直して元の中置記法の式と一致するか確認することで、不適切な記号を弾く
-    parsed = "".join(tokens)
-    if parsed != calc_formula.replace(" ", ""):
-        raise ValueError("不適切な記号が含まれています。")
-
-    # ()のそれぞれの個数を比較して、()の書き忘れを検証する
-    if parsed.count("(") != parsed.count(")"):
-        raise ValueError("()の数が一致していません。")
+    tokens = _tokenize(calc_formula)
+    _validate_tokens(tokens, calc_formula)
 
     # Shunting-yard algorithmの実装
     # tokensから値を一つずつ取り出す
