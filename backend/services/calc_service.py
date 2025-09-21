@@ -35,6 +35,10 @@ def to_RPN(calc_formula: str) -> list[str]:
     if parsed != calc_formula.replace(" ", ""):
         raise ValueError("不適切な記号が含まれています。")
 
+    # ()のそれぞれの個数を比較して、()の書き忘れを検証する
+    if parsed.count("(") != parsed.count(")"):
+        raise ValueError("()の数が一致していません。")
+
     # Shunting-yard algorithmの実装
     # tokensから値を一つずつ取り出す
     for token in tokens:
@@ -58,8 +62,11 @@ def to_RPN(calc_formula: str) -> list[str]:
         elif token == "(":
             stack.append(token)
 
-        # ")"まで来たら、"("がまでのスタックの中身を全てrpnに積む
-        elif token == ")":
+        elif token == ")" and "(" not in stack:
+            raise ValueError("()の順番が不正です。")
+
+        # ")"まで来たら、次の"("までのスタックの中身を全てrpnに積む
+        elif token == ")" and "(" in stack:
             while stack and stack[-1] != "(":
                 rpn.append(stack.pop())
             stack.pop()  # "("を捨てる

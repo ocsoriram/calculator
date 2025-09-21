@@ -4,7 +4,6 @@
 """
 
 import math
-import sys
 import pytest
 from backend.services.calc_service import calc_rpn, to_RPN
 
