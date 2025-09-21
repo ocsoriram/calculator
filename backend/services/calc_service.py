@@ -15,16 +15,17 @@ def to_RPN(calc_formula: str) -> list[str]:
     stack = []
 
     # 演算子の優先順位を指定(数値が大きい方が優先度が高い)
-    operators = {"+": 1, "-": 1, "*": 2, "x": 2, "/": 2, "÷": 2}
+    operators = {"+": 1, "-": 1, "*": 2, "×": 2, "/": 2, "÷": 2}
 
+    # トークン化用の正規表現: 小数・整数・演算子・括弧を1トークンとして抽出
+    # 注意: キャプチャグループや ^/$ アンカーを入れると findall の結果やマッチ範囲が壊れるため使用しない
     pattern = re.compile(
         r"""
-                      (^
-                      \d+\.\d+             # 小数
-                      |\d+                 # 整数
-                      |\+|\-|\*|\/|x|÷     # 四則演算子
-                      |\(|\)               # ()
-                      $)""",
+            \d+\.\d+             # 小数
+          | \d+                  # 整数
+          | \+ | \- | \* | \/ | × | ÷  # 四則演算子
+          | \(|\)                # ()
+        """,
         re.VERBOSE,
     )
     tokens = pattern.findall(calc_formula)
@@ -38,8 +39,8 @@ def to_RPN(calc_formula: str) -> list[str]:
     # tokensから値を一つずつ取り出す
     for token in tokens:
         # 小数か整数ならrpnに格納
-        # if re.match(r"(^\d+\.\d+|\d+$", token):
-        if token.isdigit():
+        # 数値判定は小数も含めて厳密に行う
+        if re.fullmatch(r"\d+(?:\.\d+)?", token):
             rpn.append(token)
 
         # 演算子はスタックに積む
@@ -78,7 +79,7 @@ def calc_rpn(rpn: list[str]) -> float:
         "+": operator.add,
         "-": operator.sub,
         "*": operator.mul,
-        "x": operator.mul,
+        "×": operator.mul,
         "/": operator.truediv,
         "÷": operator.truediv,
     }
