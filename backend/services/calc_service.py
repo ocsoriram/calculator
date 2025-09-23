@@ -11,13 +11,15 @@ import re
 def _tokenize(calc_formula) -> list[str]:
     """トークン化用の正規表現: 小数・整数・演算子・括弧を1トークンとして抽出"""
     # 注意: キャプチャグループや ^/$ アンカーを入れると findall の結果やマッチ範囲が壊れるため使用しない
+    # TODO 負の数をトークンとしてキャッチする　△5などを負の数として扱って、計算毎に△があればabs(var)*1
     pattern = re.compile(
         r"""
         \d+\.\d+               # 小数
         | \d+                  # 整数
         | \+ | \- | \* | \/ | × | ÷  # 四則演算子
         | \(|\)                # ()
-    """,
+        | \(\-\d+\.\d+
+        """,
         re.VERBOSE,
     )
     tokens = pattern.findall(calc_formula)
@@ -26,9 +28,18 @@ def _tokenize(calc_formula) -> list[str]:
 
 
 def _validate_tokens(tokens: list[str], original: str) -> None:
-    """calc_formulaのバリデーションを行う"""
+    """calc_formulaのバリデーションを行う
+    - tokenと中置記法が一致するか(空白を無視)
+    - 中置記法内の'('と')'の個数の一致をチェック
+    - 中置記法内の'('と')'の順番が正しいかチェック 例) )1+2( はNG
+
+    tokens: _tokenize(calc_formula)で中置記法を逆ポーランド記法に変換したlist[str]
+    original: 中置記法の文字列
+    """
     _validate_formula_correct(tokens, original)
     _validate_parentheses_correct(tokens)
+    # 以下のバリデーションは、to_RPN()で実施しているので不要
+    # _validate_parentheses_order_collect(tokens)
 
 
 def _validate_formula_correct(tokens: list[str], original: str):
@@ -42,6 +53,13 @@ def _validate_parentheses_correct(parsed):
     """()のそれぞれの個数を比較して、()の書き忘れを検証する"""
     if parsed.count("(") != parsed.count(")"):
         raise ValueError("()の数が一致していません。")
+
+
+# def _validate_parentheses_order_collect(tokens):
+#     """中置記法内の'('と')'の順番が正しいかチェック 例) )1+2( はNG"""
+#     for token in tokens:
+#         if token == ")" and "(" not in tokens:
+#             raise ValueError("()の順番が不正です。at validate method")
 
 
 def to_RPN(calc_formula: str) -> list[str]:
@@ -79,11 +97,11 @@ def to_RPN(calc_formula: str) -> list[str]:
         elif token == "(":
             stack.append(token)
 
-        elif token == ")" and "(" not in stack:
-            raise ValueError("()の順番が不正です。")
-
         # ")"まで来たら、次の"("までのスタックの中身を全てrpnに積む
-        elif token == ")" and "(" in stack:
+        elif token == ")":
+            # 中置記法内の()の順番を検証
+            if "(" not in stack:
+                raise ValueError("()の順番が不正です。")
             while stack and stack[-1] != "(":
                 rpn.append(stack.pop())
             stack.pop()  # "("を捨てる
