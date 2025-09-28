@@ -62,7 +62,7 @@ def test_float_multiplication():
 
 def test_int_multiplication_readable():
     """2項の掛け算の結果が正しいか検証する"""
-    # 演算子として'x'を使用
+    # 演算子として'×'を使用
     formula = "3×4"
     rpn = to_RPN(formula)
     result = calc_rpn(rpn)

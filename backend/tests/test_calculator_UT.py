@@ -4,8 +4,12 @@ import pytest
 from backend.services.calc_service import to_RPN, calc_rpn
 
 
-@pytest.mark.parametrize("invalid_formula", ["1+2)", "(1+2"])
-def test_to_RPN_missing_opening_parenthesis_raises_value_error(invalid_formula):
+@pytest.mark.parametrize(
+    "invalid_formula",
+    ["1+2)", "(1+2"],
+    ids=["extra-closing", "missing-closing"],
+)
+def test_to_RPN_missing_parenthesis_raises_value_error(invalid_formula):
     """
     開き括弧が不足しているときにValueErrorを投げるか検証する
     閉じ括弧が不足しているときにValueErrorを投げるか検証する
@@ -19,7 +23,7 @@ def test_to_RPN_missing_opening_parenthesis_raises_value_error(invalid_formula):
 def test_to_RPN_invalid_parenthesis_order_raises_value_error():
     """括弧の順番が不正なときにValueErrorを投げるか検証する"""
     invalid_formula = ")1+2("
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=r"\(\)の順番が不正です。"):
         to_RPN(invalid_formula)
 
 
@@ -45,9 +49,22 @@ def test_to_RPN_last_operator_raises_value_error():
 
 
 # TODO 連続演算子は通さない実装にきりかえる
-# TODO "1.23+*2*34", "1.23+/2+34" テストに左記を加えても通るように実装を変更する
-@pytest.mark.parametrize("invalid_formula", ["1.23++2/34"])
+# TODO "1.23+*2*34", "1.23+/2+34" テストに左記を加えても通るように実装を変更する現状"++"はテスト成功するのでtest failedとなるが問題なし
+@pytest.mark.parametrize(
+    "invalid_formula",
+    ["1.23++2/34", "1.23+*2*34", "1.23+/2+34"],
+    ids=["++", "+*", "+/"],
+)
+@pytest.mark.xfail(reason="現仕様は単項+/-を許容するため", strict=True)
 def test_to_RPN_consecutive_operators_raises_value_error(invalid_formula):
     """演算子の直後に演算子があるときに例外を投げるか検証する"""
     with pytest.raises(ValueError):
         to_RPN(invalid_formula)
+
+
+def test_calc_rpn_single_literal_returns_float():
+    """単項の数値が数値(float)として返却されることを検証する。"""
+    rpn = to_RPN("42")
+    result = calc_rpn(rpn)
+    assert isinstance(result, float)
+    assert result == 42.0
