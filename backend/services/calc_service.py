@@ -21,7 +21,6 @@ def _tokenize(calc_formula: str) -> list[str]:
         | \d+                  # 整数
         | \+ | \- | \* | \/ | × | ÷  # 四則演算子
         | \(|\)                # ()
-        | \(\-\d+\.\d+
         """,
         re.VERBOSE,
     )
@@ -82,7 +81,7 @@ def _attach_unary_signs(tokens: list[str]) -> list[str]:
 
     # 中置記法の最後に演算子がある場合はエラー　（例: "3+2+3*", "2+4-" など）
     if tokens[-1] in operators:
-        raise ValueError("式の最後に演算子を入れることはできません.")
+        raise ValueError("式の最後に演算子を入れることはできません。")
 
     while i < len(tokens):
         tok: int = tokens[i]
@@ -212,7 +211,7 @@ def calc_rpn(rpn: list[str]) -> float:
             stack.append(result)
 
         else:
-            stack.append(token)
+            stack.append(float(token))
 
     return stack[0]
 
