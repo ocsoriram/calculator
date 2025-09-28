@@ -7,8 +7,6 @@
 import operator
 import re
 
-from sympy import false
-
 
 def _tokenize(calc_formula: str) -> list[str]:
     """トークン化用の正規表現: 小数・整数・演算子・括弧を1トークンとして抽出
@@ -58,7 +56,6 @@ def _validate_parentheses_correct(parsed) -> None:
         raise ValueError("()の数が一致していません。")
 
 
-# TODO 実装の中身を確認
 def _attach_unary_signs(tokens: list[str]) -> list[str]:
     """中置記法内で表れた+と-の直後の数値を連結して、単一の数値トークンとする。
 
