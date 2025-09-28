@@ -1,7 +1,33 @@
-"""計算機能を提供するservice
+"""計算機能を提供するserviceモジュール
 
-* to_RPN(calc_formula: str): 中置記法の数式を受け取って、逆ポーランド記法のlistに変換
-* calc_rpn(rpn: list[str]):逆ポーランド記法のlistの計算結果を返す
+このモジュールは中置記法の数式を逆ポーランド記法に変換し、
+その結果を数値型で返す機能を提供する。
+次の要素をサポートする:
+- 整数および小数（例: 1, 3.14）
+- 符号付き数値（例: -5）
+- 四則演算子: +, -, *, / および記号 ×, ÷
+- 丸括弧 ( ) による優先度指定
+
+注意:
+- {} 括弧などは未実装
+- 入力文字列中の空白は無視される
+
+公開関数:
+
+    to_RPN(calc_formula: str) -> list[str]:
+        中置記法の数式を受け取って、逆ポーランド記法のlistに変換して返す
+        例外: 不正なトークン、括弧の不整合、式の末尾に演算子がある場合は ValueError を送出する。
+
+    calc_rpn(rpn: list[str]) -> float:
+        逆ポーランド記法のlistの計算結果を返す
+        例外: 0 除算が発生した場合は ZeroDivisionErrorを送出する。
+
+例:
+>>> from services.calc_service import to_RPN, calc_rpn
+>>> rpn = to_RPN("1 + 2*(3 - 4.5)")
+>>> calc_rpn(rpn)
+-0.0
+
 """
 
 import operator
@@ -11,8 +37,16 @@ import re
 def _tokenize(calc_formula: str) -> list[str]:
     """トークン化用の正規表現: 小数・整数・演算子・括弧を1トークンとして抽出
 
-    param
-    calc_formula:str 中置記法の数式
+
+    Args:
+        calc_formula (str): 中置記法の数式
+    Returns:
+        list[str]: トークン化された文字列のリスト
+    Example:
+        >>> _tokenize("1 + 2 * (3 - 4.5)")
+        ['1', '+', '2', '*', '(', '3', '-', '4.5', ')']
+
+
     """
     # 注意: キャプチャグループや ^/$ アンカーを入れると findall の結果やマッチ範囲が壊れるため使用しない
     pattern = re.compile(
@@ -56,14 +90,21 @@ def _validate_parentheses_correct(parsed) -> None:
 
 
 def _attach_unary_signs(tokens: list[str]) -> list[str]:
-    """中置記法内で表れた+と-の直後の数値を連結して、単一の数値トークンとする。
+    """
+    中置記法内で表れた+と-の直後の数値を連結して、単一の数値トークンとする。
 
-    符号とみなす条件:
+        符号とみなす条件:
       - 中置記法の先頭に現れる'+','-'
       - '('の直後に現れる'+','-'
 
-    param
-    tokens:list[str] 中置記法
+    Args:
+        tokens: トークン化された中置記法のリスト。
+
+    Raises:
+        ValueError: 符号の直後に数値がない、または数値以外が来ている場合。
+
+    Returns:
+        list[str]: 負数としての-がある場合、符号が結合されたトークンのリスト。
     """
 
     # 空リストが渡されたらそのまま返す
@@ -134,8 +175,25 @@ def _attach_unary_signs(tokens: list[str]) -> list[str]:
     return merged
 
 
+# TODO {}括弧の実装
 def to_RPN(calc_formula: str) -> list[str]:
-    """Shunting-yard algorithm を使って、中置記法の計算式の文字列を逆ポーランド記法に変換する関数."""
+    """Shunting-yard algorithm を使って、中置記法の計算式の文字列を逆ポーランド記法に変換する
+
+    スペースは無視して、整数、小数、符号付き数値、四則演算子と()をサポートする。
+
+    Args:
+        calc_formula (str): 変換したい中置記法の式。 例: "1 + 2 * (3 - 4.5)"
+
+    Returns:
+        list[str]: 逆ポーランド記法に変換後のトークンのリスト。 例: ["1", "2", "3", "4.5", "-", "*", "+"]
+
+    Raises:
+        ValueError: 不適切な文字が含まれる、()の順序不正・不足、中置記法の末尾に演算子があるなどに入力エラーがあるとき。
+
+    Example:
+        >>> to_RPN(1+2*(3-4))
+            ['1', '2', '3', '4', '-', '*', '+']
+    """
 
     rpn: list[str] = []
     stack = []
@@ -189,7 +247,23 @@ def to_RPN(calc_formula: str) -> list[str]:
 
 
 def calc_rpn(rpn: list[str]) -> float:
-    """逆ポーランド記法のリストを受けとって計算結果を返す"""
+    """逆ポーランド記法のリストを受けとって計算結果の数値を返す。
+
+    Args:
+        rpn (list[str]): 数値と四則演算子を並べた RPN トークンのリスト。
+                         数値は文字列で与える（"1" や "-5.2"）。
+
+    Returns:
+        float: 計算結果（浮動小数点）。
+
+    Raises:
+        ZeroDivisionError: 0 で除算が発生した場合。
+
+    Example:
+        >>> calc_rpn(['2', '3', '+'])
+        5.0
+
+    """
 
     # 演算子と四則演算をマッピングする
     ops = {
