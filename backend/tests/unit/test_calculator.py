@@ -4,6 +4,7 @@ import pytest
 from backend.services.calc_service import to_RPN, calc_rpn
 
 
+@pytest.mark.integration
 @pytest.mark.parametrize(
     "invalid_formula",
     ["1+2)", "(1+2"],
@@ -20,6 +21,7 @@ def test_to_RPN_missing_parenthesis_raises_value_error(invalid_formula):
         to_RPN(invalid_formula)
 
 
+@pytest.mark.integration
 def test_to_RPN_invalid_parenthesis_order_raises_value_error():
     """括弧の順番が不正なときにValueErrorを投げるか検証する"""
     invalid_formula = ")1+2("
@@ -27,6 +29,7 @@ def test_to_RPN_invalid_parenthesis_order_raises_value_error():
         to_RPN(invalid_formula)
 
 
+@pytest.mark.integration
 def test_calc_RPN_zero_division_raises():
     """ゼロ除算が起きた場合にエラーを投げるか検証する"""
     rpn = ["5", "0", "/"]
@@ -34,6 +37,7 @@ def test_calc_RPN_zero_division_raises():
         calc_rpn(rpn)
 
 
+@pytest.mark.integration
 def test_to_RPN_invalid_symbol_raises_value_error():
     """使用不可能な記号を使ったときに例外を投げるか検証する"""
     invalid_formula = "5?3"
@@ -41,6 +45,7 @@ def test_to_RPN_invalid_symbol_raises_value_error():
         to_RPN(invalid_formula)
 
 
+@pytest.mark.integration
 def test_to_RPN_last_operator_raises_value_error():
     """中置記法の最後に演算子があるときに例外を投げるか検証する"""
     invalid_formula = "1.2+5-2.3+"
@@ -50,11 +55,13 @@ def test_to_RPN_last_operator_raises_value_error():
 
 # TODO 連続演算子は通さない実装にきりかえる
 # TODO "1.23+*2*34", "1.23+/2+34" テストに左記を加えても通るように実装を変更する現状"++"はテスト成功するのでtest failedとなるが問題なし
+@pytest.mark.integration
 @pytest.mark.parametrize(
     "invalid_formula",
     ["1.23++2/34", "1.23+*2*34", "1.23+/2+34"],
     ids=["++", "+*", "+/"],
 )
+@pytest.mark.integration
 @pytest.mark.xfail(reason="現仕様は単項+/-を許容するため", strict=True)
 def test_to_RPN_consecutive_operators_raises_value_error(invalid_formula):
     """演算子の直後に演算子があるときに例外を投げるか検証する"""
@@ -62,6 +69,7 @@ def test_to_RPN_consecutive_operators_raises_value_error(invalid_formula):
         to_RPN(invalid_formula)
 
 
+@pytest.mark.integration
 def test_calc_rpn_single_literal_returns_float():
     """単項の数値が数値(float)として返却されることを検証する。"""
     rpn = to_RPN("42")
