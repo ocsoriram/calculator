@@ -27,3 +27,7 @@ tmp
 # IDE設定
 .vscode/
 # .idea/
+
+
+*.http
+*.sh
