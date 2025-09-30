@@ -30,8 +30,4 @@ page=2: 2ページ目を指定するパラメータ.
 
 
 ### バックエンド実装
-- 単項の負の数を扱えるようにする
-- (-1)+2を負の数として解釈できるようにする
 - 12 34 が通ってしまう。数値同士の間のスペースは通さないようにする
-- testsディレクトリをunitとintegration　に分割する。
-- pytest.iniをhttpかdevtoolsディレクトリに移動させる。(ファイル冒頭に pytestmark = [pytest.mark.unit]（UT）/pytestmark = [pytest.mark.integration]（IT）と付けるか、ディレクトリで分ける。)
