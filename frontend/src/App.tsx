@@ -1,35 +1,65 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect, useState } from 'react';
+import './App.css';
+import { Keypad } from './components/Keypad';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const API_BASE_URL: string | undefined = import.meta.env.VITE_API_BASE_URL;
+
+  const [data, setData] = useState<unknown>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  const [isCalculating, setIsCalculating] = useState(false)
+
+  useEffect(() => {
+    // API_BASE_URLが未定義ならエラーを返す。
+    if (!API_BASE_URL) {
+      setError("VITE_API_BASE_URL is not set");
+      setLoading(false);
+      return;
+    }
+
+    const controller = new AbortController();
+    // アプリの起動メソッド。
+    const run = async () => {
+      try {
+        const signal = controller.signal
+        // signalを渡すと、のちにabort()でキャンセルできる。
+        const res = await fetch(API_BASE_URL, { signal });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const json = await res.json();
+        setData(json);
+      } catch (err) {
+        // AbortErrorはエラーとしてキャッチしない。。想定済みのエラーのため。
+        if (err instanceof Error && err.name !== "AbortError") {
+          setError((err as Error).message);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    run();
+    // 進行中のfetchリクエストを強制的にキャンセルする。
+    return () => controller.abort();
+  }, [API_BASE_URL]);
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+
+  function handlePress() {
+
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div>
+      <h1>API Response</h1>
+      <pre>{JSON.stringify(data, null, 2)}</pre>
+      {/* <Calculator/> */}
+      <Keypad onPress={handlePress} disabled={isCalculating} />
+      {/* <History/> */}
+    </div>
+  );
 }
 
-export default App
+export default App;
