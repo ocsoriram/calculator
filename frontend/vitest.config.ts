@@ -1,0 +1,12 @@
+// vitest.config.ts
+import { defineConfig } from "vitest/config";
+import react from "@vitejs/plugin-react";
+
+export default defineConfig({
+  plugins: [react()],
+  test: {
+    environment: "jsdom", // ← 仮想DOM環境を有効化
+    globals: true, // describe, it, expect を自動認識
+    setupFiles: "./src/setupTests.ts", // ← 任意: jest-domの設定ファイル
+  },
+});
