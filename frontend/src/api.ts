@@ -10,6 +10,11 @@ function normalizeFormula(formula: string) {
   return formula.replaceAll("*","×").replaceAll("/","÷");
 }
 
+/**
+ * 計算式の文字列を元に、計算結果を保持するJSONを返す
+ * @param formula 計算式の文字列
+ * @returns
+ */
 export async function evaluateFormula(formula: string) {
   if (!BASE) throw new Error("VITE_API_BASE_URLが定義されていません。");
   const res = await fetch(`${BASE}/calc`, {

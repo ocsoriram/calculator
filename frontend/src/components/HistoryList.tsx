@@ -15,8 +15,8 @@ export function HistoryList({items, onUse, onClear}:Props) {
   return (
     <aside className="history">
       <div className="header">
-        <h3>履歴</h3>
-        <button onClick={onClear}>クリア</button>
+        <h3 className="pt-2 text-4xl">計算履歴</h3>
+        <button className="mt-2 " onClick={onClear}>クリア</button>
       </div>
       <ul>
         {items.map((it) => (

@@ -1,11 +1,27 @@
 type Props = {
-  expression: string,
-  result: string | null,  // TODO なぜ string | nullなのか
+  expression: string;
+  result: string | null; // TODO なぜ string | nullなのか
   onChange: (V: string) => void;
+};
+
+/**
+ * 計算結果を含む式を返す関数
+ * @param expression
+ * @param result
+ * @returns 例 4+5=9 のような文字列。計算結果が取得できない場合は式を表示させない
+ */
+function showFormula(expression: string, result: string | null) {
+  //
+  if (result == null) return null;
+
+  if (expression) {
+    return `${expression} = ${result ?? ""}`;
+  } else {
+    return "";
+  }
 }
 
-
-export function Display({expression, result, onChange}:Props) {
+export function Display({ expression, result, onChange }: Props) {
   return (
     <div className="display flex flex-col items-end bg-gray-800 rounded-4xl p-4 shadow-lg">
       <input
@@ -17,7 +33,7 @@ export function Display({expression, result, onChange}:Props) {
         aria-label="式"
       />
       <div className="res" aria-live="polite">
-        {result ?? ""}{" "}
+        {showFormula(expression, result)}
       </div>
     </div>
   );

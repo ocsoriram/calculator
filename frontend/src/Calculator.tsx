@@ -6,14 +6,24 @@ import { Keypad } from "./components/Keypad";
 
 const STORAGE_KEY = "calc_history_v1";
 
+/**
+ * 引数で与えられたintの桁数を丸める関数
+ * @param n
+ * @param maxDigits
+ * @returns
+ */
 function formatResult(n: number, maxDigits = 12) {
   // 簡易的な丸め：有効桁数ベース
   const str = Number(n).toPrecision(maxDigits);
   // 末尾の不要な0と小数点を除去
+  // return str
+  //   .replace(/(?:\\.\\d*?[1-9])0+$/, "$1") // 小数点以下の不要な末尾の0を削除する
+  //   .replace(/\\.0+$/, "")                 //
+  //   .replace(/\\.$/, "");
   return str
-    .replace(/(?:\\.\\d*?[1-9])0+$/, "$1")
-    .replace(/\\.0+$/, "")
-    .replace(/\\.$/, "");
+    .replace(/(\.\d*?[1-9])0+$/, "$1") // 小数末尾の0削除
+    .replace(/\.0+$/, "") // .000 → ""
+    .replace(/\.$/, ""); // . → ""
 }
 
 export default function Calculator() {
@@ -23,17 +33,23 @@ export default function Calculator() {
   const [error, setError] = useState<string | null>(null);
   const [history, setHistory] = useState<HistoryItem[]>([]);
 
-  // 履歴の復元 AI実装コピペ
+  // 履歴の復元 AI実装コピペ 動いてないイメージ
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) setHistory(JSON.parse(raw));
-    } catch {}
+    } catch(e) {
+       console.error("Failed to parse history from localStorage:", e);
+    }
   }, []);
   // 履歴の保存
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
   }, [history]);
+
+  useEffect(() => {
+
+   }, []);
 
   /**
    * キーボードがクリックされたときの挙動を定義する関数
@@ -58,7 +74,8 @@ export default function Calculator() {
   }
 
   /**
-   *
+   * "="が押された時に発火する関数。/
+   * 文字列の計算式を
    * @returns
    */
   async function evaluate() {
@@ -83,10 +100,15 @@ export default function Calculator() {
       };
       // 最新の計算式の履歴を先頭に追加、かつ履歴を100件までにする
       setHistory((h) => [item, ...h].slice(0, 100));
-    } catch (e: any) {
-      setError(e?.message ?? "計算に失敗しました。");
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        setError(e?.message);
+      } else {
+        setError("計算に失敗しました。");
+      }
     } finally {
       setIsCalculating(false);
+      // setExpression("");
     }
   }
 
@@ -106,7 +128,6 @@ export default function Calculator() {
 
   return (
     <>
-      <h1>this is calculator component</h1>
       <Display
         expression={expression}
         result={result}
