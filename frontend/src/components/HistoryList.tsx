@@ -14,14 +14,16 @@ type Props = {
 export function HistoryList({items, onUse, onClear}:Props) {
   return (
     <aside className="history">
-      <div className="header">
+      <div className="history-header">
         <h3 className="pt-2 text-4xl">計算履歴</h3>
-        <button className="mt-2 " onClick={onClear}>クリア</button>
+        <button className="mt-2 " onClick={onClear}>
+          クリア
+        </button>
       </div>
       <ul>
         {items.map((it) => (
-          <li key={it.id}>
-            <button onClick={() => onUse(it.expression)}>
+          <li className="pt-2" key={it.id}>
+            <button className="w-full" onClick={() => onUse(it.expression)}>
               <span className="hist-expr">{it.expression}</span>
               <span className="hist-res">= {it.result}</span>
             </button>

@@ -1,1 +1,7 @@
 @import "tailwindcss";
+
+@layer components {
+  .main-container {
+    @apply absolute top-[150px] left-1/2 -translate-x-1/2;
+  }
+}

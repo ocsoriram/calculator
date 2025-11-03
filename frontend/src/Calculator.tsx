@@ -38,8 +38,8 @@ export default function Calculator() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) setHistory(JSON.parse(raw));
-    } catch(e) {
-       console.error("Failed to parse history from localStorage:", e);
+    } catch (e) {
+      console.error("Failed to parse history from localStorage:", e);
     }
   }, []);
   // 履歴の保存
@@ -47,9 +47,7 @@ export default function Calculator() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
   }, [history]);
 
-  useEffect(() => {
-
-   }, []);
+  useEffect(() => {}, []);
 
   /**
    * キーボードがクリックされたときの挙動を定義する関数
@@ -128,18 +126,24 @@ export default function Calculator() {
 
   return (
     <>
-      <Display
-        expression={expression}
-        result={result}
-        onChange={setExpression}
-      />
-      {error && <div className="error">{error}</div>}
-      <Keypad onPress={handlePress} disabled={isCalculating} />
-      <HistoryList
-        items={history}
-        onUse={setExpression}
-        onClear={() => setHistory([])}
-      />
+      <div className="main-container">
+        <div className="calculator-container">
+          <Display
+            expression={expression}
+            result={result}
+            onChange={setExpression}
+          />
+          {error && <div className="error">{error}</div>}
+          <Keypad onPress={handlePress} disabled={isCalculating} />
+        </div>
+        <div className="history-container ">
+          <HistoryList
+            items={history}
+            onUse={setExpression}
+            onClear={() => setHistory([])}
+          />
+        </div>
+      </div>
     </>
   );
 }
