@@ -7,7 +7,7 @@ type ButtonConfig = {
 const buttonConfigs: ButtonConfig[] = [
   {label: "(", type: "btnFunc"},
   {label: ")", type: "btnFunc"},
-  {label: "%", type: "btnOperator"},
+  {label: "DEL", type: "btnFunc"},
   {label: "AC", type: "btnFunc"},
 
   {label: "7", type: "btnNum"},

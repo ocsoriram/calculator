@@ -28,6 +28,7 @@ function formatResult(n: number, maxDigits = 12) {
 
 export default function Calculator() {
   const [expression, setExpression] = useState<string>("");
+  const [prevExpression, setPrevExpression] = useState<string>("");
   const [result, setResult] = useState<string | null>(null);
   const [isCalculating, setIsCalculating] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -73,7 +74,7 @@ export default function Calculator() {
 
   /**
    * "="が押された時に発火する関数。/
-   * 文字列の計算式を
+   * 文字列の計算式をバックエンドにfetchして計算結果を取得する
    * @returns
    */
   async function evaluate() {
@@ -83,9 +84,11 @@ export default function Calculator() {
     setIsCalculating(true);
     setError(null);
 
+    let value:string = "";
+
     try {
       const json = await evaluateFormula(formula);
-      const value: string =
+       value =
         typeof json.result === "number"
           ? formatResult(json.result)
           : String(json.received ?? "");
@@ -105,8 +108,9 @@ export default function Calculator() {
         setError("計算に失敗しました。");
       }
     } finally {
+      setPrevExpression(expression);
+      setExpression(value);
       setIsCalculating(false);
-      // setExpression("");
     }
   }
 
@@ -130,6 +134,7 @@ export default function Calculator() {
         <div className="calculator-container">
           <Display
             expression={expression}
+            prevExpression={prevExpression}
             result={result}
             onChange={setExpression}
           />

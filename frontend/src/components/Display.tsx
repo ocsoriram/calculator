@@ -1,5 +1,6 @@
 type Props = {
   expression: string;
+  prevExpression: string;
   result: string | null; // TODO なぜ string | nullなのか
   onChange: (V: string) => void;
 };
@@ -21,19 +22,19 @@ function showFormula(expression: string, result: string | null) {
   }
 }
 
-export function Display({ expression, result, onChange }: Props) {
+export function Display({ expression, prevExpression, result, onChange }: Props) {
   return (
     <div className="display flex flex-col items-end bg-gray-800 rounded-4xl p-4 shadow-lg h-22">
       <input
         className="expr w-full text-right text-2xl text-white bg-transparent border-none focus:outline-none placeholder-gray-500"
         value={expression}
         onChange={(e) => onChange(e.target.value)}
-        placeholder="0"
+        placeholder={result ?? "0"}
         inputMode="decimal"
         aria-label="式"
       />
       <div className="res" aria-live="polite">
-        {showFormula(expression, result)}
+        {showFormula(prevExpression, result)}
       </div>
     </div>
   );
