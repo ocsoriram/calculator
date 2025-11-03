@@ -1,0 +1,22 @@
+@import "./input.css";
+
+@layer components {
+
+  .keypad{
+    @apply grid grid-cols-4 gap-2 p-2;
+  }
+
+  .btnNum,
+  .btnOperator,
+  .btnFunc,
+  .btnOther {
+    /* 高さ/角丸/文字サイズ/太さ/トランジションなど */
+    @apply h-12 rounded-xl text-lg font-medium transition;
+  }
+
+  /* 個別の見た目（色など） */
+  .btnNum      { @apply bg-slate-700  text-white active:scale-95; }
+  .btnOperator { @apply bg-amber-500  text-white active:scale-95; }
+  .btnFunc     { @apply bg-slate-500  text-white active:scale-95; }
+  .btnOther    { @apply bg-slate-400  text-white active:scale-95; }
+}
