@@ -85,13 +85,14 @@ export default function Calculator() {
     setError(null);
 
     let value:string = "";
+    const FAILED_MESSAGE = "計算結果を取得できませんでした。"
 
     try {
       const json = await evaluateFormula(formula);
        value =
         typeof json.result === "number"
           ? formatResult(json.result)
-          : String(json.received ?? "");
+          : FAILED_MESSAGE;
       setResult(value);
       const item: HistoryItem = {
         id: crypto.randomUUID(),
@@ -101,15 +102,16 @@ export default function Calculator() {
       };
       // 最新の計算式の履歴を先頭に追加、かつ履歴を100件までにする
       setHistory((h) => [item, ...h].slice(0, 100));
+      setPrevExpression(expression);
+      setExpression(value);
     } catch (e: unknown) {
       if (e instanceof Error) {
-        setError(e?.message);
+        console.error(e.message);
+        setError(FAILED_MESSAGE);
       } else {
         setError("計算に失敗しました。");
       }
     } finally {
-      setPrevExpression(expression);
-      setExpression(value);
       setIsCalculating(false);
     }
   }
@@ -138,7 +140,7 @@ export default function Calculator() {
             result={result}
             onChange={setExpression}
           />
-          {error && <div className="error">{error}</div>}
+          {error && <div className="error text-red-500">{error}</div>}
           <Keypad onPress={handlePress} disabled={isCalculating} />
         </div>
         <div className="history-container ">
