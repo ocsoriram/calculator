@@ -119,11 +119,11 @@ export default function Calculator() {
     }
   }
 
-/**
- * 式の()の数の一致の真偽値を返す関数
- * @param expression
- * @returns boolean
- */
+  /**
+   * 式の()の数の一致の真偽値を返す関数
+   * @param expression
+   * @returns boolean
+   */
   function hasParenError(expression: string): boolean {
     let isParenError: boolean = false;
     const leftParenthesisTotal: number = expression.match(/\(/g)?.length ?? 0;
@@ -150,7 +150,7 @@ export default function Calculator() {
     return isStartError;
   }
 
-  function hasCharError(expression:string): boolean {
+  function hasCharError(expression: string): boolean {
     let hasCharError = false;
     const alphabetRegex = /[a-zA-Z]/;
     const japaneseRegex = /[\u3040-\u30FF\u4E00-\u9FFF\u3400-\u4DBF]/;
@@ -159,7 +159,6 @@ export default function Calculator() {
       hasCharError = true;
     }
     return hasCharError;
-
   }
 
   /**
@@ -183,18 +182,18 @@ export default function Calculator() {
   }
 
   // 物理キーボード対応（任意）AI実装コピペ
-  // useEffect(() => {
-  //   const onKey = (e: KeyboardEvent) => {
-  //     if (e.key === "Enter") return evaluate();
-  //     if (e.key === "Backspace") return handlePress("DEL");
-  //     if (/^[0-9.+\\-*/()]$/.test(e.key)) {
-  //       const map: Record<string, string> = { "*": "×", "/": "÷" };
-  //       return handlePress(map[e.key] ?? e.key);
-  //     }
-  //   };
-  //   window.addEventListener("keydown", onKey);
-  //   return () => window.removeEventListener("keydown", onKey);
-  // }, [expression]);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Enter") return evaluate();
+      if (e.key === "Backspace") return handlePress("DEL");
+      if (/^[0-9.+\\-*/()]$/.test(e.key)) {
+        const map: Record<string, string> = { "*": "×", "/": "÷" };
+        return handlePress(map[e.key] ?? e.key);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [expression]);
 
   return (
     <>
