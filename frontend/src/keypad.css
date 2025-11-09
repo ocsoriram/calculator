@@ -15,8 +15,31 @@
   }
 
   /* 個別の見た目（色など） */
-  .btnNum      { @apply bg-slate-700  text-white active:scale-95; }
-  .btnOperator { @apply bg-amber-500  text-white active:scale-95; }
-  .btnFunc     { @apply bg-slate-500  text-white active:scale-95; }
-  .btnOther    { @apply bg-slate-400  text-white active:scale-95; }
+  .btnNum {
+    @apply
+     bg-slate-700
+     text-white active:scale-95
+     ;}
+  .btnOperator {
+    @apply
+     bg-amber-500
+     text-white active:scale-95
+    ;}
+      .btnEqual{
+    @apply
+     bg-amber-500
+     text-white active:scale-95
+     disabled:bg-amber-800
+
+     ;}
+  .btnFunc {
+    @apply
+     bg-slate-500
+     text-white active:scale-95
+     ;}
+  .btnOther {
+    @apply
+     bg-slate-400
+     text-white active:scale-95
+     ;}
 }

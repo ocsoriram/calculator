@@ -15,7 +15,7 @@ function normalizeFormula(formula: string) {
  * @param formula 計算式の文字列
  * @returns
  */
-export async function evaluateFormula(formula: string) {
+export async function evaluateFormula(formula: string){
   if (!BASE) throw new Error("VITE_API_BASE_URLが定義されていません。");
   const res = await fetch(`${BASE}/calc`, {
     method: "POST",

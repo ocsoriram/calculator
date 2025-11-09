@@ -1,7 +1,7 @@
 
 type ButtonConfig = {
   label: string,
-  type: 'btnNum' | 'btnOperator' | 'btnFunc' | 'btnOther';
+  type: 'btnNum' | 'btnOperator' | 'btnFunc' | 'btnOther' | 'btnEqual'
 }
 
 const buttonConfigs: ButtonConfig[] = [
@@ -27,17 +27,20 @@ const buttonConfigs: ButtonConfig[] = [
 
   {label: "0", type: "btnNum"},
   {label: ".", type: "btnOther"},
-  {label: "=", type: "btnOperator"},
+  {label: "=", type: "btnEqual"},
   {label: "+", type: "btnOperator"},
 ];
 
-type Props = {onPress: (key: string) => void; disabled?: boolean };
+type Props = {onPress: (key: string) => void;
+              disabled?: boolean,
+              isError?: boolean
+            };
 
-export function Keypad({onPress, disabled}: Props) {
+export function Keypad({onPress, disabled, isError}: Props) {
   return (
     <div className="keypad">
       {buttonConfigs.map((btn) => (
-        <button className={btn.type} key={btn.label} onClick={() => onPress(btn.label)} disabled={disabled} aria-label={btn.label}>
+        <button className={btn.type} key={btn.label} onClick={() => onPress(btn.label)} disabled={(btn.type === "btnEqual" && isError) || disabled} aria-label={btn.label}>
           {btn.label}
         </button>
        ))}

@@ -31,7 +31,8 @@ export default function Calculator() {
   const [prevExpression, setPrevExpression] = useState<string>("");
   const [result, setResult] = useState<string | null>(null);
   const [isCalculating, setIsCalculating] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  const [isError, setIsError] = useState<boolean>(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [history, setHistory] = useState<HistoryItem[]>([]);
 
   // 履歴の復元 AI実装コピペ 動いてないイメージ
@@ -48,15 +49,14 @@ export default function Calculator() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
   }, [history]);
 
-  useEffect(() => {}, []);
-
   /**
    * キーボードがクリックされたときの挙動を定義する関数
    * @param key 押されたキーボードの値
    * @returns
    */
   function handlePress(key: string) {
-    setError(null);
+    setErrorMsg(null);
+    const newExpression = expression + key;
     switch (key) {
       case "AC":
         setExpression("");
@@ -64,16 +64,14 @@ export default function Calculator() {
         return;
       case "DEL":
         setExpression((prev) => prev.slice(0, -1));
+        checkExpression(expression);
         return;
       case "=":
-        if (isFormulaCorrect(expression)) {
-          return evaluate();
-        } else {
-          setError("()の数が一致しません。");
-          return ;
-        }
+        return evaluate();
+
       default:
-        setExpression((prev) => prev + key);
+        setExpression(newExpression);
+        checkExpression(newExpression);
     }
   }
 
@@ -87,14 +85,14 @@ export default function Calculator() {
     const formula = expression.trim();
     if (!formula) return;
     setIsCalculating(true);
-    setError(null);
+    setErrorMsg(null);
 
-    let value:string = "";
-    const FAILED_MESSAGE = "計算結果を取得できませんでした。"
+    let value: string = "";
+    const FAILED_MESSAGE = "計算結果を取得できませんでした。";
 
     try {
       const json = await evaluateFormula(formula);
-       value =
+      value =
         typeof json.result === "number"
           ? formatResult(json.result)
           : FAILED_MESSAGE;
@@ -109,32 +107,79 @@ export default function Calculator() {
       setHistory((h) => [item, ...h].slice(0, 100));
       setPrevExpression(expression);
       setExpression(value);
-
     } catch (e: unknown) {
-
       if (e instanceof Error) {
         console.error(e.message);
-        setError(FAILED_MESSAGE);
-
+        setErrorMsg(FAILED_MESSAGE);
       } else {
-        setError("計算に失敗しました。");
+        setErrorMsg("計算に失敗しました。");
       }
-
     } finally {
       setIsCalculating(false);
     }
   }
 
-  function isFormulaCorrect(formula:string): boolean {
-    let isFormulaCorrect: boolean = false;
-    const leftParenthesisTotal:number = formula.match(/\(/g)?.length ?? 0;
-    const rightParenthesisTotal:number = formula.match(/\)/g)?.length ?? 0;
+/**
+ * 式の()の数の一致の真偽値を返す関数
+ * @param expression
+ * @returns boolean
+ */
+  function hasParenError(expression: string): boolean {
+    let isParenError: boolean = false;
+    const leftParenthesisTotal: number = expression.match(/\(/g)?.length ?? 0;
+    const rightParenthesisTotal: number = expression.match(/\)/g)?.length ?? 0;
 
-    if (leftParenthesisTotal === rightParenthesisTotal) {
-      isFormulaCorrect = true;
+    if (leftParenthesisTotal !== rightParenthesisTotal) {
+      isParenError = true;
+    }
+    return isParenError;
+  }
+
+  /**
+   * 式の最初の文字の正当性の真偽値を返す関数
+   * @param expression
+   * @returns boolean
+   */
+  function hasStartError(expression: string): boolean {
+    let isStartError = false;
+    const first = expression[0];
+    const notAllowed = ["×", "÷", "*", "/"];
+    if (notAllowed.includes(first)) {
+      isStartError = true;
+    }
+    return isStartError;
+  }
+
+  function hasCharError(expression:string): boolean {
+    let hasCharError = false;
+    const alphabetRegex = /[a-zA-Z]/;
+    const japaneseRegex = /[\u3040-\u30FF\u4E00-\u9FFF\u3400-\u4DBF]/;
+
+    if (alphabetRegex.test(expression) || japaneseRegex.test(expression)) {
+      hasCharError = true;
+    }
+    return hasCharError;
+
+  }
+
+  /**
+   * 式全体の正当性を検証するファサード関数
+   * @param expression 式を表現するstring
+   */
+  function checkExpression(expression: string) {
+    const errors: string[] = [];
+    if (hasParenError(expression)) {
+      errors.push("()の数が一致しません。");
+    }
+    if (hasStartError(expression)) {
+      errors.push(`式の最初に${expression[0]}は使えません。`);
+    }
+    if (hasCharError(expression)) {
+      errors.push("日本語や英文字は使えません。");
     }
 
-    return isFormulaCorrect
+    setIsError(errors.length > 0);
+    setErrorMsg(errors[0] ?? null);
   }
 
   // 物理キーボード対応（任意）AI実装コピペ
@@ -155,14 +200,34 @@ export default function Calculator() {
     <>
       <div className="main-container">
         <div className="calculator-container">
-          <Display
+          {/* <Display
             expression={expression}
             prevExpression={prevExpression}
             result={result}
             onChange={setExpression}
+          /> */}
+          <Display
+            expression={expression}
+            prevExpression={prevExpression}
+            result={result}
+            onChange={(v: string) => {
+              // ユーザーが input に文字を打ったときに呼ばれる
+              // 1) state を更新する
+              setExpression(v);
+              // 2) 更新後の文字列 v に対して即時に妥当性チェックを行う
+              checkExpression(v);
+            }}
           />
-          {error && <div className="error text-red-500">{error}</div>}
-          <Keypad onPress={handlePress} disabled={isCalculating} />
+          <div className="h-6">
+            {errorMsg && (
+              <div className="errorMsg text-red-500">{errorMsg}</div>
+            )}
+          </div>
+          <Keypad
+            onPress={handlePress}
+            disabled={isCalculating}
+            isError={isError}
+          />
         </div>
         <div className="history-container ">
           <HistoryList
