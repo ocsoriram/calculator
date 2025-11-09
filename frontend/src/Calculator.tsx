@@ -66,7 +66,12 @@ export default function Calculator() {
         setExpression((prev) => prev.slice(0, -1));
         return;
       case "=":
-        return evaluate();
+        if (isFormulaCorrect(expression)) {
+          return evaluate();
+        } else {
+          setError("()の数が一致しません。");
+          return ;
+        }
       default:
         setExpression((prev) => prev + key);
     }
@@ -104,16 +109,32 @@ export default function Calculator() {
       setHistory((h) => [item, ...h].slice(0, 100));
       setPrevExpression(expression);
       setExpression(value);
+
     } catch (e: unknown) {
+
       if (e instanceof Error) {
         console.error(e.message);
         setError(FAILED_MESSAGE);
+
       } else {
         setError("計算に失敗しました。");
       }
+
     } finally {
       setIsCalculating(false);
     }
+  }
+
+  function isFormulaCorrect(formula:string): boolean {
+    let isFormulaCorrect: boolean = false;
+    const leftParenthesisTotal:number = formula.match(/\(/g)?.length ?? 0;
+    const rightParenthesisTotal:number = formula.match(/\)/g)?.length ?? 0;
+
+    if (leftParenthesisTotal === rightParenthesisTotal) {
+      isFormulaCorrect = true;
+    }
+
+    return isFormulaCorrect
   }
 
   // 物理キーボード対応（任意）AI実装コピペ

@@ -12,7 +12,7 @@ type Props = {
  * @returns 例 4+5=9 のような文字列。計算結果が取得できない場合は式を表示させない
  */
 function showFormula(expression: string, result: string | null) {
-  //
+
   if (result == null) return null;
 
   if (expression) {
