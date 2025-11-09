@@ -186,10 +186,10 @@ export default function Calculator() {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Enter") return evaluate();
       if (e.key === "Backspace") return handlePress("DEL");
-      if (/^[0-9.+\\-*/()]$/.test(e.key)) {
-        const map: Record<string, string> = { "*": "×", "/": "÷" };
-        return handlePress(map[e.key] ?? e.key);
-      }
+      // if (/^[0-9.+\-*/()]$/.test(e.key)) {
+      //   const map: Record<string, string> = { "*": "×", "/": "÷" };
+      //   return handlePress(map[e.key] ?? e.key);
+      // }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
