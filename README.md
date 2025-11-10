@@ -29,6 +29,23 @@ keyword=AI: 検索キーワード「AI」を指定するパラメータ.
 page=2: 2ページ目を指定するパラメータ.  
 
 
+## reactのテスト実行
+
+### テスト実行
+```bash
+npm run -w frontend test
+```
+
+### 監視モードで実行
+```bash
+npm run -w frontend test -- --watch
+```
+
+### UIモード
+```bash
+npm run -w frontend test -- --ui
+```
+
 ## TODO
 ### フロントエンド実装
 - ~~計算結果を丸めて表示する機能を実装する。→backendからはfloatで渡されるため ~~

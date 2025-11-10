@@ -4,10 +4,14 @@
     { "path": "./tsconfig.app.json" },
     { "path": "./tsconfig.node.json" }
   ],
-    "compilerOptions": {
+  "compilerOptions": {
     "jsx": "react-jsx",
     "moduleResolution": "node",
-    "types": ["react", "react-dom"],
+    "types": [
+      "react",
+      "react-dom",
+      "vitest/globals" // describe/it/expectに型補完を適用する
+    ],
     "target": "ESNext",
     "module": "ESNext",
     "lib": ["DOM", "ESNext"]
