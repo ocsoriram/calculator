@@ -15,11 +15,6 @@ const STORAGE_KEY = "calc_history_v1";
 function formatResult(n: number, maxDigits = 12) {
   // 簡易的な丸め：有効桁数ベース
   const str = Number(n).toPrecision(maxDigits);
-  // 末尾の不要な0と小数点を除去
-  // return str
-  //   .replace(/(?:\\.\\d*?[1-9])0+$/, "$1") // 小数点以下の不要な末尾の0を削除する
-  //   .replace(/\\.0+$/, "")                 //
-  //   .replace(/\\.$/, "");
   return str
     .replace(/(\.\d*?[1-9])0+$/, "$1") // 小数末尾の0削除
     .replace(/\.0+$/, "") // .000 → ""
@@ -35,7 +30,7 @@ export default function Calculator() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [history, setHistory] = useState<HistoryItem[]>([]);
 
-  // 履歴の復元 AI実装コピペ 動いてないイメージ
+  // 履歴を復元する AI実装コピペ 動いてないイメージ
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
@@ -161,6 +156,16 @@ export default function Calculator() {
     return hasCharError;
   }
 
+  const hasBlankError = (expression: string) => {
+    let hasBlankError = false;
+    const spaceRegex = /(.*)\s(.*)/;
+
+    if (spaceRegex.test(expression)) {
+      hasBlankError = true;
+    }
+    return hasBlankError;
+  };
+
   /**
    * 式全体の正当性を検証するファサード関数
    * @param expression 式を表現するstring
@@ -176,6 +181,9 @@ export default function Calculator() {
     if (hasCharError(expression)) {
       errors.push("日本語や英文字は使えません。");
     }
+    if (hasBlankError(expression)) {
+      errors.push("式の途中にスペースを含めることはできません。");
+    }
 
     setIsError(errors.length > 0);
     setErrorMsg(errors[0] ?? null);
@@ -186,10 +194,6 @@ export default function Calculator() {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Enter") return evaluate();
       if (e.key === "Backspace") return handlePress("DEL");
-      // if (/^[0-9.+\-*/()]$/.test(e.key)) {
-      //   const map: Record<string, string> = { "*": "×", "/": "÷" };
-      //   return handlePress(map[e.key] ?? e.key);
-      // }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -199,12 +203,6 @@ export default function Calculator() {
     <>
       <div className="main-container">
         <div className="calculator-container">
-          {/* <Display
-            expression={expression}
-            prevExpression={prevExpression}
-            result={result}
-            onChange={setExpression}
-          /> */}
           <Display
             expression={expression}
             prevExpression={prevExpression}
