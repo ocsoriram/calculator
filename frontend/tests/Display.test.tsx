@@ -1,7 +1,7 @@
 // Display.test.tsx
+import { Display } from "@/components/Display";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { Display } from "./Display";
 
 describe("Display コンポーネント", () => {
   it("入力には expression、placeholder には result が入る", () => {
