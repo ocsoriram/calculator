@@ -44,23 +44,22 @@ describe("HistoryList コンポーネント", () => {
 
   it("履歴の行をクリックすると、onUseが呼ばれる", () => {
     const handleUse = vi.fn();
-
     render(
       <HistoryList items={sampleItems} onUse={handleUse} onClear={vi.fn()} />
     );
-    // 1+2の行のボタンを取得
-    const firstHistoryButton = screen.getByRole("button", {
-      name: /1\+2/,
+    // 10/2の行のボタンを取得
+    const secondHistoryButton = screen.getByRole("button", {
+      name: /10\/2/,
     });
     // 履歴ボタンをクリック
-    fireEvent.click(firstHistoryButton);
+    fireEvent.click(secondHistoryButton);
 
-    // onUseが"1+2"という式で1回呼ばれていることを確認
+    // onUseが"10/2"という式で1回呼ばれていることを確認
     expect(handleUse).toHaveBeenCalledTimes(1);
-    expect(handleUse).toHaveBeenCalledWith("1+2");
+    expect(handleUse).toHaveBeenCalledWith(sampleItems[1].expression);
   });
 
-  it("履歴の行をクリックすると、onClearが呼ばれる", () => {
+  it("クリアボタンをクリックすると、onClearが呼ばれる", () => {
     const handleClear = vi.fn();
     render(
       <HistoryList items={sampleItems} onUse={vi.fn()} onClear={handleClear} />
