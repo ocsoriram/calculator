@@ -1,3 +1,8 @@
+## 開発環境起動
+```bash
+./startDev.sh 
+```
+
 ## React起動コマンド
 
 ```bash
@@ -44,6 +49,11 @@ npm run -w frontend test -- --watch
 ### UIモード
 ```bash
 npm run -w frontend test -- --ui
+```
+
+### テスト名指定事項
+```bash
+npm run -w frontend test HistoryList.test.tsx 
 ```
 
 ## TODO
