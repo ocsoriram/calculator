@@ -11,8 +11,7 @@ type Props = {
  * @param result
  * @returns 例 4+5=9 のような文字列。計算結果が取得できない場合は式を表示させない
  */
-function showFormula(expression: string, result: string | null) {
-
+function showFormula(expression: string, result: string | null): string | null {
   if (result == null) return null;
 
   if (expression) {
@@ -22,7 +21,12 @@ function showFormula(expression: string, result: string | null) {
   }
 }
 
-export function Display({ expression, prevExpression, result, onChange }: Props) {
+export function Display({
+  expression,
+  prevExpression,
+  result,
+  onChange,
+}: Props) {
   return (
     <div className="display flex flex-col items-end bg-gray-800 rounded-4xl p-4 shadow-lg h-22">
       <input

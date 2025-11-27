@@ -77,6 +77,7 @@ npm run -w frontend test HistoryList.test.tsx
 - ブラウザの履歴保存機能を有効にする
 - 任意の履歴のみ削除する機能
 - レスポンシブ対応
+- 日本語入力時に、エンターでqueryを投げている
 
 ### バックエンド実装
 - ~~CORSの設定~~
