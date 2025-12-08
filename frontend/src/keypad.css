@@ -1,45 +1,43 @@
 @import "./input.css";
 
 @layer components {
-
-  .keypad{
-    @apply grid grid-cols-4 gap-2 p-2;
+  .keypad {
+    /* デフォルト: 小さい画面向け、広い画面では少し余裕を持たせる */
+    @apply grid grid-cols-4 gap-1 sm:gap-2 p-2 w-full max-w-xs sm:max-w-md mx-auto;
   }
 
   .btnNum,
   .btnOperator,
   .btnFunc,
-  .btnOther {
+  .btnOther,
+  .btnEqual {
     /* 高さ/角丸/文字サイズ/太さ/トランジションなど */
-    @apply h-12 rounded-xl text-lg font-medium transition;
+    @apply flex items-center justify-center text-center
+     w-full p-0
+    rounded-xl text-base sm:text-xl font-medium leading-tight transition
+    min-h-12;
   }
 
   /* 個別の見た目（色など） */
   .btnNum {
-    @apply
-     bg-slate-700
-     text-white active:scale-95
-     ;}
+    @apply bg-slate-700
+     text-white active:scale-95;
+  }
   .btnOperator {
-    @apply
-     bg-amber-500
+    @apply bg-amber-500
+     text-white active:scale-95;
+  }
+  .btnEqual {
+    @apply bg-amber-500
      text-white active:scale-95
-    ;}
-      .btnEqual{
-    @apply
-     bg-amber-500
-     text-white active:scale-95
-     disabled:bg-amber-800
-
-     ;}
+     disabled:bg-amber-800;
+  }
   .btnFunc {
-    @apply
-     bg-slate-500
-     text-white active:scale-95
-     ;}
+    @apply bg-slate-500
+     text-white active:scale-95;
+  }
   .btnOther {
-    @apply
-     bg-slate-400
-     text-white active:scale-95
-     ;}
+    @apply bg-slate-400
+     text-white active:scale-95;
+  }
 }

@@ -51,23 +51,27 @@ export default function Calculator() {
    */
   function handlePress(key: string) {
     setErrorMsg(null);
-    const newExpression = expression + key;
-    switch (key) {
-      case "AC":
-        setExpression("");
-        setResult(null);
-        return;
-      case "DEL":
-        setExpression((prev) => prev.slice(0, -1));
-        checkExpression(expression);
-        return;
-      case "=":
-        return evaluate();
 
-      default:
-        setExpression(newExpression);
-        checkExpression(newExpression);
+    if (key === "=") {
+      if (isError || isCalculating) return;
+      return evaluate();
     }
+
+    if (key === "AC") {
+      setExpression("");
+      setResult(null);
+      return;
+    }
+
+    if (key === "DEL") {
+      setExpression((prev) => prev.slice(0, -1));
+      checkExpression(expression);
+      return;
+    }
+
+    const newExpression = expression + key;
+    setExpression(newExpression);
+    checkExpression(newExpression);
   }
 
   /**
@@ -192,8 +196,14 @@ export default function Calculator() {
   // 物理キーボード対応（任意）AI実装コピペ
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Enter") return evaluate();
-      if (e.key === "Backspace") return handlePress("DEL");
+      if (e.key === "Enter") {
+        e.preventDefault();
+        return handlePress("=");
+      }
+      if (e.key === "Backspace") {
+        e.preventDefault();
+        return handlePress("DEL");
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
