@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { evaluateFormula } from "./api";
 import { Display } from "./components/Display";
 import { HistoryList, type HistoryItem } from "./components/HistoryList";
@@ -8,9 +8,9 @@ const STORAGE_KEY = "calc_history_v1";
 
 /**
  * 引数で与えられたintの桁数を丸める関数
- * @param n
- * @param maxDigits
- * @returns
+ * @param n 例）4.20000000
+ * @param maxDigits 有効桁数
+ * @returns 引数のintの末尾から不要な0を排除した値 例)4.2
  */
 function formatResult(n: number, maxDigits = 12) {
   // 簡易的な丸め：有効桁数ベース
@@ -45,41 +45,11 @@ export default function Calculator() {
   }, [history]);
 
   /**
-   * キーボードがクリックされたときの挙動を定義する関数
-   * @param key 押されたキーボードの値
-   * @returns
-   */
-  function handlePress(key: string) {
-    setErrorMsg(null);
-
-    if (key === "=") {
-      if (isError || isCalculating) return;
-      return evaluate();
-    }
-
-    if (key === "AC") {
-      setExpression("");
-      setResult(null);
-      return;
-    }
-
-    if (key === "DEL") {
-      setExpression((prev) => prev.slice(0, -1));
-      checkExpression(expression);
-      return;
-    }
-
-    const newExpression = expression + key;
-    setExpression(newExpression);
-    checkExpression(newExpression);
-  }
-
-  /**
    * "="が押された時に発火する関数。/
    * 文字列の計算式をバックエンドにfetchして計算結果を取得する
    * @returns
    */
-  async function evaluate() {
+  const evaluate = useCallback(async () => {
     // 両端の余計な空白を削除する
     const formula = expression.trim();
     if (!formula) return;
@@ -116,14 +86,15 @@ export default function Calculator() {
     } finally {
       setIsCalculating(false);
     }
-  }
+  }, [expression]);
 
   /**
    * 式の()の数の一致の真偽値を返す関数
    * @param expression
    * @returns boolean
    */
-  function hasParenError(expression: string): boolean {
+  const hasParenError = useCallback((expression: string): boolean => {
+    // TODO UX的に括弧の個数検証→順番の正当性検証に。ただし現状もバックエンドで弾いているのでクリティカルではない
     let isParenError: boolean = false;
     const leftParenthesisTotal: number = expression.match(/\(/g)?.length ?? 0;
     const rightParenthesisTotal: number = expression.match(/\)/g)?.length ?? 0;
@@ -132,14 +103,14 @@ export default function Calculator() {
       isParenError = true;
     }
     return isParenError;
-  }
+  }, []);
 
   /**
    * 式の最初の文字の正当性の真偽値を返す関数
    * @param expression
    * @returns boolean
    */
-  function hasStartError(expression: string): boolean {
+  const hasStartError = useCallback((expression: string): boolean => {
     let isStartError = false;
     const first = expression[0];
     const notAllowed = ["×", "÷", "*", "/"];
@@ -147,9 +118,9 @@ export default function Calculator() {
       isStartError = true;
     }
     return isStartError;
-  }
+  }, []);
 
-  function hasCharError(expression: string): boolean {
+  const hasCharError = useCallback((expression: string): boolean => {
     let hasCharError = false;
     const alphabetRegex = /[a-zA-Z]/;
     const japaneseRegex = /[\u3040-\u30FF\u4E00-\u9FFF\u3400-\u4DBF]/;
@@ -158,9 +129,9 @@ export default function Calculator() {
       hasCharError = true;
     }
     return hasCharError;
-  }
+  }, []);
 
-  const hasBlankError = (expression: string) => {
+  const hasBlankError = useCallback((expression: string) => {
     let hasBlankError = false;
     const spaceRegex = /(.*)\s(.*)/;
 
@@ -168,30 +139,77 @@ export default function Calculator() {
       hasBlankError = true;
     }
     return hasBlankError;
-  };
+  }, []);
 
   /**
    * 式全体の正当性を検証するファサード関数
    * @param expression 式を表現するstring
    */
-  function checkExpression(expression: string) {
-    const errors: string[] = [];
-    if (hasParenError(expression)) {
-      errors.push("()の数が一致しません。");
-    }
-    if (hasStartError(expression)) {
-      errors.push(`式の最初に${expression[0]}は使えません。`);
-    }
-    if (hasCharError(expression)) {
-      errors.push("日本語や英文字は使えません。");
-    }
-    if (hasBlankError(expression)) {
-      errors.push("式の途中にスペースを含めることはできません。");
-    }
+  const checkExpression = useCallback(
+    (expression: string) => {
+      if (!expression) {
+        setIsError(false);
+        setErrorMsg(null);
+        return;
+      }
 
-    setIsError(errors.length > 0);
-    setErrorMsg(errors[0] ?? null);
-  }
+      if (hasParenError(expression)) {
+        setIsError(true);
+        setErrorMsg("()の数が一致しません。");
+        return;
+      }
+      if (hasStartError(expression)) {
+        setIsError(true);
+        setErrorMsg(`式の最初に${expression[0]}は使えません。`);
+        return;
+      }
+      if (hasCharError(expression)) {
+        setIsError(true);
+        setErrorMsg("日本語や英文字は使えません。");
+        return;
+      }
+      if (hasBlankError(expression)) {
+        setIsError(true);
+        setErrorMsg("式の途中にスペースを含めることはできません。");
+        return;
+      }
+    },
+    [hasBlankError, hasCharError, hasParenError, hasStartError]
+  );
+
+  /**
+   * キーボードがクリックされたときの挙動を定義する関数
+   * @param key 押されたキーボードの値
+   * @returns
+   */
+  const handlePress = useCallback(
+    (key: string) => {
+      setErrorMsg(null);
+
+      if (key === "=") {
+        if (isError || isCalculating) return;
+        return evaluate();
+      }
+
+      if (key === "AC") {
+        setExpression("");
+        setResult(null);
+        return;
+      }
+
+      if (key === "DEL") {
+        const newExpression = expression.slice(0, -1);
+        setExpression(newExpression);
+        checkExpression(newExpression);
+        return;
+      }
+
+      const newExpression = expression + key;
+      setExpression(newExpression);
+      checkExpression(newExpression);
+    },
+    [expression, isError, isCalculating, evaluate, checkExpression]
+  );
 
   // 物理キーボード対応（任意）AI実装コピペ
   useEffect(() => {
@@ -207,7 +225,7 @@ export default function Calculator() {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [expression]);
+  }, [handlePress]);
 
   return (
     <>

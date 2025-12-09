@@ -1,3 +1,5 @@
+import { memo } from "react";
+
 export type HistoryItem = {
   id: string;
   expression: string;
@@ -11,12 +13,16 @@ type Props = {
   onClear: () => void;
 };
 
-export function HistoryList({ items, onUse, onClear }: Props) {
+export const HistoryList = memo(function HistoryList({
+  items,
+  onUse,
+  onClear,
+}: Props) {
   return (
     <aside className="history p-3 pt-6">
-      <div className="history-header flex justify-between">
-        <h3 className="text-4xl">計算履歴</h3>
-        <button className="ms-2 bg-sky-700" onClick={onClear}>
+      <div className="history-header flex justify-center items-center">
+        <h3 className="text-base sm:text-3xl sm:me-4">計算履歴</h3>
+        <button className="ms-2 bg-sky-600" onClick={onClear}>
           クリア
         </button>
       </div>
@@ -32,4 +38,4 @@ export function HistoryList({ items, onUse, onClear }: Props) {
       </ul>
     </aside>
   );
-}
+});
