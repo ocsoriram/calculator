@@ -20,7 +20,12 @@ const sampleItems: HistoryItem[] = [
 describe("HistoryList コンポーネント", () => {
   it("見出しとクリアボタンが表示される。", () => {
     render(
-      <HistoryList items={sampleItems} onUse={vi.fn()} onClear={vi.fn()} />
+      <HistoryList
+        items={sampleItems}
+        onUse={vi.fn()}
+        onClearAll={vi.fn()}
+        onClear={vi.fn()}
+      />
     );
     // "計算履歴"が表示されていることを確認
     expect(
@@ -32,7 +37,12 @@ describe("HistoryList コンポーネント", () => {
 
   it("渡された履歴がexpression / resultとして表示される", () => {
     render(
-      <HistoryList items={sampleItems} onUse={vi.fn()} onClear={vi.fn()} />
+      <HistoryList
+        items={sampleItems}
+        onUse={vi.fn()}
+        onClearAll={vi.fn()}
+        onClear={vi.fn()}
+      />
     );
     // 1件目の表示を確認
     expect(screen.getByText("1+2")).toBeInTheDocument();
@@ -45,7 +55,12 @@ describe("HistoryList コンポーネント", () => {
   it("履歴の行をクリックすると、onUseが呼ばれる", () => {
     const handleUse = vi.fn();
     render(
-      <HistoryList items={sampleItems} onUse={handleUse} onClear={vi.fn()} />
+      <HistoryList
+        items={sampleItems}
+        onUse={handleUse}
+        onClearAll={vi.fn()}
+        onClear={vi.fn()}
+      />
     );
     // 10/2の行のボタンを取得
     const secondHistoryButton = screen.getByRole("button", {
@@ -60,19 +75,24 @@ describe("HistoryList コンポーネント", () => {
   });
 
   it("クリアボタンをクリックすると、onClearが呼ばれる", () => {
-    const handleClear = vi.fn();
+    const handleClearAll = vi.fn();
     render(
-      <HistoryList items={sampleItems} onUse={vi.fn()} onClear={handleClear} />
+      <HistoryList
+        items={sampleItems}
+        onUse={vi.fn()}
+        onClearAll={handleClearAll}
+        onClear={vi.fn()}
+      />
     );
     // クリアボタンを取得する
-    const clearButton = screen.getByRole("button", {
+    const clearAllButton = screen.getByRole("button", {
       name: "クリア",
     });
 
     // クリアボタンをクリックする
-    fireEvent.click(clearButton);
+    fireEvent.click(clearAllButton);
 
     // onClearが1回呼ばれていることを確認
-    expect(handleClear).toHaveBeenCalledTimes(1);
+    expect(handleClearAll).toHaveBeenCalledTimes(1);
   });
 });

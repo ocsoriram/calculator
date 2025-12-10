@@ -30,6 +30,10 @@ export default function Calculator() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [history, setHistory] = useState<HistoryItem[]>([]);
 
+  const handleDeleteHistory = useCallback((id: string) => {
+    setHistory((prev) => prev.filter((item) => item.id !== id));
+  }, []);
+
   // 履歴を復元する AI実装コピペ 動いてないイメージ
   useEffect(() => {
     try {
@@ -173,6 +177,8 @@ export default function Calculator() {
         setErrorMsg("式の途中にスペースを含めることはできません。");
         return;
       }
+      // エラーが発生しなければisErrorではない
+      setIsError(false);
     },
     [hasBlankError, hasCharError, hasParenError, hasStartError]
   );
@@ -193,6 +199,7 @@ export default function Calculator() {
 
       if (key === "AC") {
         setExpression("");
+        setIsError(false);
         setResult(null);
         return;
       }
@@ -258,7 +265,8 @@ export default function Calculator() {
           <HistoryList
             items={history}
             onUse={setExpression}
-            onClear={() => setHistory([])}
+            onClearAll={() => setHistory([])}
+            onClear={handleDeleteHistory}
           />
         </div>
       </div>
