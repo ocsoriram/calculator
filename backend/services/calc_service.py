@@ -33,6 +33,18 @@
 import operator
 import re
 
+# 変換と評価で共通の演算子定義を使用する。
+_OPERATOR_FUNCTIONS = {
+    "+": operator.add,
+    "-": operator.sub,
+    "*": operator.mul,
+    "×": operator.mul,
+    "/": operator.truediv,
+    "÷": operator.truediv,
+}
+_OPERATOR_PRECEDENCE = {"+": 1, "-": 1, "*": 2, "×": 2, "/": 2, "÷": 2}
+_NUMBER_PATTERN = re.compile(r"-?\d+(?:\.\d+)?")
+
 
 def _tokenize(calc_formula: str) -> list[str]:
     """トークン化用の正規表現: 小数・整数・演算子・括弧を1トークンとして抽出
@@ -111,27 +123,22 @@ def _attach_unary_signs(tokens: list[str]) -> list[str]:
     if not tokens:
         return tokens
 
-    operators = {"+", "-", "*", "×", "/", "÷"}
-
     # 最後にreturnするリスト　例)　["-1", "+", "5", "-", "3"]
     merged: list[str] = []
     i = 0
 
-    # 数値判定（符号付きも許容）
-    number_full: re.Pattern[str] = re.compile(r"-?\d+(?:\.\d+)?$")
-
     # 中置記法の最後に演算子がある場合はエラー　（例: "3+2+3*", "2+4-" など）
-    if tokens[-1] in operators:
+    if tokens[-1] in _OPERATOR_FUNCTIONS:
         raise ValueError("式の最後に演算子を入れることはできません。")
 
     while i < len(tokens):
-        tok: int = tokens[i]
+        tok: str = tokens[i]
 
         if tok in {"+", "-"}:
             prev: str | None = merged[-1] if merged else None
             # 符号の文脈（先頭 / 演算子の直後 / '(' の直後）
             is_unary_context: bool = (
-                (prev is None) or (prev in operators) or (prev == "(")
+                (prev is None) or (prev in _OPERATOR_FUNCTIONS) or (prev == "(")
             )
 
             if is_unary_context:
@@ -166,9 +173,9 @@ def _attach_unary_signs(tokens: list[str]) -> list[str]:
     # 最終的に、連結後の数値が正しく数値パターンに合うか軽く確認（任意）
     for m in merged:
         # 数値 or 既知演算子 or 括弧 であれば OK
-        if number_full.fullmatch(m):
+        if _NUMBER_PATTERN.fullmatch(m):
             continue
-        if m in operators or m in {"(", ")"}:
+        if m in _OPERATOR_FUNCTIONS or m in {"(", ")"}:
             continue
         raise ValueError(f"不正なトークンを検出しました: {m}")
 
@@ -198,9 +205,6 @@ def to_RPN(calc_formula: str) -> list[str]:
     rpn: list[str] = []
     stack = []
 
-    # 演算子の優先順位を指定(数値が大きい方が優先度が高い)
-    operators = {"+": 1, "-": 1, "*": 2, "×": 2, "/": 2, "÷": 2}
-
     tokens = _tokenize(calc_formula)
     merged_tokens = _attach_unary_signs(tokens)
 
@@ -211,17 +215,17 @@ def to_RPN(calc_formula: str) -> list[str]:
     for token in merged_tokens:
         # 小数か整数ならrpnに格納
         # 数値判定は小数と負の数を含めて厳密に行う
-        if re.fullmatch(r"-?\d+(?:\.\d+)?", token):
+        if _NUMBER_PATTERN.fullmatch(token):
             rpn.append(token)
 
         # TODO 連続して演算子が積まれたら、ValueError   例）1++2
         # 演算子はスタックに積む
-        elif token in operators:
+        elif token in _OPERATOR_PRECEDENCE:
             # スタックに積んだ演算子の優先度よりも、今回の演算子の優先度が高い場合はrpnの末尾に追加
             while (
                 stack
-                and stack[-1] in operators
-                and operators[stack[-1]] >= operators[token]
+                and stack[-1] in _OPERATOR_PRECEDENCE
+                and _OPERATOR_PRECEDENCE[stack[-1]] >= _OPERATOR_PRECEDENCE[token]
             ):
                 rpn.append(stack.pop())
             stack.append(token)
@@ -265,23 +269,13 @@ def calc_rpn(rpn: list[str]) -> float:
 
     """
 
-    # 演算子と四則演算をマッピングする
-    ops = {
-        "+": operator.add,
-        "-": operator.sub,
-        "*": operator.mul,
-        "×": operator.mul,
-        "/": operator.truediv,
-        "÷": operator.truediv,
-    }
-
     stack = []
 
     for token in rpn:
-        if token in ops:
+        if token in _OPERATOR_FUNCTIONS:
             b = float(stack.pop())  # 右の数
             a = float(stack.pop())  # 左の数
-            result = ops[token](a, b)
+            result = _OPERATOR_FUNCTIONS[token](a, b)
             stack.append(result)
 
         else:
